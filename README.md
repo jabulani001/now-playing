@@ -20,7 +20,8 @@ Läuft als Web-App direkt im Browser, kein App Store nötig.
 ## Selbst nutzen
 
 1. Im [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) eine App anlegen (Web API) und die eigene URL als Redirect URI eintragen
-2. Repo forken, in `index.html` die `CLIENT_ID` ersetzen und GitHub Pages aktivieren
-3. Seite in Safari öffnen und über Teilen → "Zum Home-Bildschirm" hinzufügen
+2. Repo forken und GitHub Pages aktivieren
+3. Seite öffnen, beim ersten Start die eigene Client ID eingeben und verbinden
+4. In Safari über Teilen → "Zum Home-Bildschirm" hinzufügen
 
 Spotify Premium ist nötig. Lyrics kommen von [lrclib.net](https://lrclib.net), das Wetter von [Open-Meteo](https://open-meteo.com).

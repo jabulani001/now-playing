@@ -167,6 +167,7 @@
   .screen.show { display:flex; }
   .screen h1 { font-size:26px; font-weight:800; }
   .screen p { opacity:.7; font-size:15px; line-height:1.5; max-width:480px; }
+  .screen input { width:100%; max-width:420px; padding:14px 16px; border-radius:12px; border:1px solid #333; background:#16161c; color:#fff; font-size:16px; font-family:inherit; text-align:center; }
   .screen button { padding:14px 28px; border-radius:999px; border:none; background:#1ed760; color:#000; font-weight:700; font-size:16px; cursor:pointer; }
   #idle { position:fixed; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px; z-index:5; text-align:center; }
   body.idle #idle { display:flex; }
@@ -229,13 +230,14 @@
 <div id="setup" class="screen">
   <h1>Now Playing</h1>
   <p id="setupmsg">Verbinde dich einmal mit deinem Spotify-Konto.</p>
+  <input id="cidinput" placeholder="Spotify Client ID" autocomplete="off" autocapitalize="off" spellcheck="false">
   <button id="login">Mit Spotify verbinden</button>
 </div>
 <div id="err"></div>
 
 <script>
 const $ = id => document.getElementById(id);
-const CLIENT_ID = '7c812f9baf9141fb9b141e8c56d7968d';
+const cid = () => store.get('cid');
 const REDIRECT = location.origin + location.pathname;
 const SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state user-library-read user-library-modify';
 const SCOPE_VER = '2';
@@ -253,17 +255,19 @@ const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(
 function randStr(n=64){ const a=new Uint8Array(n); crypto.getRandomValues(a); return b64url(a).slice(0,n); }
 
 async function login(){
+  const v = $('cidinput').value.trim(); if(v) store.set('cid', v);
+  if(!cid()){ $('cidinput').focus(); return; }
   const verifier = randStr(64);
   store.set('verifier', verifier);
   const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
-  const p = new URLSearchParams({ client_id:CLIENT_ID, response_type:'code', redirect_uri:REDIRECT,
+  const p = new URLSearchParams({ client_id:cid(), response_type:'code', redirect_uri:REDIRECT,
     code_challenge_method:'S256', code_challenge:challenge, scope:SCOPES });
   location.href = 'https://accounts.spotify.com/authorize?' + p;
 }
 async function tokenRequest(params){
   const r = await fetch('https://accounts.spotify.com/api/token', {
     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams({ client_id:CLIENT_ID, ...params }) });
+    body:new URLSearchParams({ client_id:cid(), ...params }) });
   if(!r.ok) throw new Error('Token-Fehler ' + r.status);
   const j = await r.json();
   store.set('access', j.access_token);
@@ -303,7 +307,7 @@ const fmt = ms => { const s = Math.max(0, Math.floor(ms/1000)); return Math.floo
 const curMs = () => Math.min(S.duration, S.progress + (S.playing ? Date.now() - S.fetchedAt : 0));
 function showErr(msg){ const e=$('err'); e.textContent=msg; e.style.display='block'; clearTimeout(showErr.t); showErr.t=setTimeout(()=>e.style.display='none', 3500); }
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'), 1200); }
-function showSetup(msg){ $('setup').classList.add('show'); if(msg) $('setupmsg').textContent = msg; }
+function showSetup(msg){ $('setup').classList.add('show'); if(msg) $('setupmsg').textContent = msg; $('cidinput').value = cid() || ''; $('cidinput').style.display = cid() ? 'none' : ''; }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ================= Polling ================= */
