@@ -31,8 +31,8 @@
 
   /* ---------- Topbar ---------- */
   #top { position:fixed; top:var(--st); left:var(--sl); right:var(--sr); display:flex; align-items:center; justify-content:space-between; z-index:6; font-weight:600; opacity:.65; font-size:min(3.6vh,2vw); pointer-events:none; transition:opacity .4s; }
-  #top .r { display:flex; align-items:center; gap:14px; pointer-events:auto; }
-  #moon { background:none; border:none; color:#fff; font-size:inherit; opacity:.9; cursor:pointer; padding:4px; }
+  #top .r { display:flex; align-items:center; gap:14px; line-height:1; pointer-events:auto; }
+  #moon { background:none; border:none; color:#fff; font-size:inherit; opacity:.9; cursor:pointer; padding:4px; display:grid; place-items:center; }
   body.theme-clock #top .l { visibility:hidden; }
 
   /* ---------- Pager ---------- */
@@ -176,7 +176,7 @@
 
 <div id="top">
   <div class="l"><span id="clock">--:--</span> · <span id="date"></span></div>
-  <div class="r"><span id="weather"></span><button id="moon" aria-label="Nachtmodus">🌙</button></div>
+  <div class="r"><span id="weather"></span><button id="moon" aria-label="Nachtmodus"></button></div>
 </div>
 
 <div id="pager">
@@ -359,7 +359,7 @@ $('like').onclick = async () => {
   if(!S.item?.uri) return;
   const want = !S.liked; S.liked = want; renderLike();
   $('like').classList.remove('pop'); void $('like').offsetWidth; $('like').classList.add('pop');
-  try { await api('/me/library?uris=' + encodeURIComponent(S.item.uri), { method: want ? 'PUT' : 'DELETE' }); toast(want ? '💚 Gespeichert' : 'Entfernt'); }
+  try { await api('/me/library?uris=' + encodeURIComponent(S.item.uri), { method: want ? 'PUT' : 'DELETE' }); toast(want ? 'Gespeichert' : 'Entfernt'); }
   catch { S.liked = !want; renderLike(); showErr('Like hat nicht geklappt'); }
 };
 
@@ -382,14 +382,14 @@ async function loadLyrics(item){
     }
   } catch {}
   if(L.forId !== item.id) return;
-  if(data?.instrumental){ $('lines').innerHTML = '<p class="msg">🎵 Instrumental</p>'; return; }
+  if(data?.instrumental){ $('lines').innerHTML = '<p class="msg">Instrumental</p>'; return; }
   if(data?.syncedLyrics){
     L.synced = true;
     L.lines = data.syncedLyrics.split('\n').map(l => {
       const m = l.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);
       return m ? { t:(+m[1]*60 + +m[2])*1000, text:m[3] } : null;
     }).filter(Boolean);
-    $('lines').innerHTML = L.lines.map((l,i) => `<p data-i="${i}">${esc(l.text || '♪')}</p>`).join('');
+    $('lines').innerHTML = L.lines.map((l,i) => `<p data-i="${i}">${esc(l.text || '…')}</p>`).join('');
   } else if(data?.plainLyrics){
     $('lines').className = 'plain';
     $('lines').innerHTML = data.plainLyrics.split('\n').map(l => `<p>${esc(l) || '&nbsp;'}</p>`).join('');
@@ -471,7 +471,7 @@ function applyNight(){
   const h = new Date().getHours();
   const on = nightMode === 'an' || (nightMode === 'auto' && (h >= 22 || h < 6));
   document.body.classList.toggle('night', on);
-  $('moon').textContent = nightMode === 'auto' ? '🌗' : nightMode === 'an' ? '🌙' : '☀️';
+  $('moon').innerHTML = svg(nightMode === 'auto' ? 'auto' : nightMode === 'an' ? 'moon' : 'sun', '1.05em');
 }
 $('moon').onclick = () => {
   nightMode = NIGHT_MODES[(NIGHT_MODES.indexOf(nightMode) + 1) % 3]; store.set('night', nightMode);
@@ -492,12 +492,24 @@ function tick(){
   }
   if(page === 1) syncLyrics();
 }
-const WMO = c => c===0?'☀️':c<=2?'🌤️':c===3?'☁️':c<=48?'🌫️':c<=57?'🌦️':c<=67?'🌧️':c<=77?'🌨️':c<=82?'🌧️':c<=86?'🌨️':'⛈️';
+const IC = {
+  sun:'<circle cx="12" cy="12" r="4.5"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g>',
+  cloud:'<path d="M7 19a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9.5a4.75 4.75 0 0 1-.25 9.5z"/>',
+  part:'<circle cx="8" cy="8" r="3.5"/><path d="M9 20a4.2 4.2 0 0 1-.5-8.37A5 5 0 0 1 18.2 11 4 4 0 0 1 18 20z"/>',
+  rain:'<path d="M7 15a4.5 4.5 0 0 1-.55-8.97A5.5 5.5 0 0 1 17.2 6a4.5 4.5 0 0 1-.2 9z"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></g>',
+  snow:'<path d="M7 15a4.5 4.5 0 0 1-.55-8.97A5.5 5.5 0 0 1 17.2 6a4.5 4.5 0 0 1-.2 9z"/><circle cx="8" cy="19" r="1.2"/><circle cx="12" cy="21" r="1.2"/><circle cx="16" cy="19" r="1.2"/>',
+  fog:'<g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M3 13h18M5 17h14"/></g>',
+  storm:'<path d="M7 14a4.5 4.5 0 0 1-.55-8.97A5.5 5.5 0 0 1 17.2 5a4.5 4.5 0 0 1-.2 9z"/><path d="M13 13l-4 5h3l-1 4 4-5h-3z"/>',
+  moon:'<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
+  auto:'<path d="M12 3.8a8.2 8.2 0 0 0 0 16.4z"/><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+};
+const svg = (k, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor" style="vertical-align:-0.15em">${IC[k]}</svg>`;
+const WMO = c => c===0?'sun':c<=2?'part':c===3?'cloud':c<=48?'fog':c<=67?'rain':c<=77?'snow':c<=82?'rain':c<=86?'snow':'storm';
 async function loadWeather(){
   try {
     const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&timezone=Europe%2FBerlin`);
     const j = await r.json();
-    $('weather').textContent = `${WMO(j.current.weather_code)} ${Math.round(j.current.temperature_2m)}°`;
+    $('weather').innerHTML = `${svg(WMO(j.current.weather_code), '1.05em')} ${Math.round(j.current.temperature_2m)}°`;
   } catch {}
 }
 
@@ -572,7 +584,7 @@ document.addEventListener('click', keepAwake, { once:true });
   setInterval(loadQueue, 20000);
   setInterval(loadWeather, 15*60*1000);
   setInterval(applyNight, 60000);
-  if(!store.get('hinted')){ store.set('hinted','1'); setTimeout(() => toast('← Wischen für Lyrics · ↕ für Themes'), 1500); }
+  if(!store.get('hinted')){ store.set('hinted','1'); setTimeout(() => toast('Links wischen: Lyrics · Hoch/runter: Themes'), 1500); }
 })();
 </script>
 </body>
