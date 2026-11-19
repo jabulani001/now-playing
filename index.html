@@ -102,6 +102,7 @@
 const $ = id => document.getElementById(id);
 const REDIRECT = location.origin + location.pathname;
 const SCOPES = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
+const DEFAULT_CID = '7c812f9baf9141fb9b141e8c56d7968d';
 const store = {
   get(k){ try { return localStorage.getItem(k); } catch { return null; } },
   set(k,v){ try { localStorage.setItem(k,v); } catch {} },
@@ -113,7 +114,7 @@ const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(
 function randStr(n=64){ const a=new Uint8Array(n); crypto.getRandomValues(a); return b64url(a).slice(0,n); }
 
 async function login(){
-  const cid = $('cid').value.trim() || store.get('cid');
+  const cid = $('cid').value.trim() || store.get('cid') || DEFAULT_CID;
   if(!cid) return;
   store.set('cid', cid);
   const verifier = randStr(64);
@@ -127,7 +128,7 @@ async function login(){
 async function tokenRequest(params){
   const r = await fetch('https://accounts.spotify.com/api/token', {
     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams({ client_id:store.get('cid'), ...params }) });
+    body:new URLSearchParams({ client_id:store.get('cid') || DEFAULT_CID, ...params }) });
   if(!r.ok) throw new Error('Token-Fehler ' + r.status);
   const j = await r.json();
   store.set('access', j.access_token);
@@ -173,7 +174,7 @@ function showSetup(){
   document.body.classList.remove('authed');
   $('setup').classList.add('show');
   $('redir').textContent = REDIRECT;
-  $('cid').value = store.get('cid') || '';
+  $('cid').value = store.get('cid') || DEFAULT_CID;
 }
 
 async function poll(){
