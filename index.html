@@ -17,16 +17,16 @@
           --st:max(16px, env(safe-area-inset-top)); --sr:max(5vw, env(safe-area-inset-right));
           --sb:max(16px, env(safe-area-inset-bottom)); --sl:max(5vw, env(safe-area-inset-left)); }
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; background:#000; color:#fff; font-family:Inter,-apple-system,system-ui,sans-serif; overflow:hidden; -webkit-user-select:none; user-select:none; overscroll-behavior:none; }
+  html,body { height:100%; height:100lvh; background:#000; color:#fff; font-family:Inter,-apple-system,system-ui,sans-serif; overflow:hidden; -webkit-user-select:none; user-select:none; overscroll-behavior:none; }
   button { font-family:inherit; }
 
   /* ---------- Hintergrund ---------- */
-  #bg { position:fixed; inset:0; background:radial-gradient(120% 120% at 20% 30%, var(--c1), var(--c2) 70%); }
-  #bgimg { position:fixed; inset:-10%; background-size:cover; background-position:center; filter:blur(60px) saturate(1.4); opacity:.4; animation:drift 30s ease-in-out infinite alternate; }
+  #bg { position:fixed; inset:0; bottom:auto; height:100lvh; background:radial-gradient(120% 120% at 20% 30%, var(--c1), var(--c2) 70%); }
+  #bgimg { translate:calc(var(--px,0) * -2px) calc(var(--py,0) * -2px); position:fixed; inset:-10%; background-size:cover; background-position:center; filter:blur(60px) saturate(1.4); opacity:.4; animation:drift 30s ease-in-out infinite alternate; }
   @keyframes drift { from{transform:scale(1.1) rotate(0)} to{transform:scale(1.25) translate(-3%,2%) rotate(4deg)} }
-  #fx { position:fixed; inset:0; width:100%; height:100%; opacity:.55; }
-  #veil { position:fixed; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.1), rgba(0,0,0,.45)); }
-  #dim { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition:opacity 2s; z-index:40; }
+  #fx { position:fixed; inset:0; width:100%; height:100%; height:100lvh; opacity:.55; }
+  #veil { position:fixed; inset:0; bottom:auto; height:100lvh; background:linear-gradient(90deg, rgba(0,0,0,.1), rgba(0,0,0,.45)); }
+  #dim { position:fixed; inset:0; bottom:auto; height:100lvh; background:#000; opacity:0; pointer-events:none; transition:opacity 2s; z-index:40; }
   body.night #dim { opacity:.55; }
 
   /* ---------- Topbar ---------- */
@@ -36,34 +36,39 @@
   body.theme-clock #top .l { visibility:hidden; }
 
   /* ---------- Pager ---------- */
-  #pager { position:fixed; inset:0; display:flex; width:200vw; transition:transform .45s cubic-bezier(.2,.8,.2,1); z-index:2; touch-action:none; }
+  #pager { position:fixed; inset:0; bottom:auto; height:100lvh; display:flex; width:200vw; transition:transform .45s cubic-bezier(.2,.8,.2,1); z-index:2; touch-action:none; }
   body.page-lyrics #pager { transform:translateX(-100vw); }
   .page { width:100vw; height:100%; position:relative; overflow:hidden; }
-  #dots { position:fixed; bottom:calc(var(--sb) - 4px); left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:6; }
+  #dots { position:fixed; bottom:calc(var(--sb) + 2px); left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:6; }
   #dots i { width:7px; height:7px; border-radius:50%; background:#fff; opacity:.3; transition:opacity .3s, width .3s; }
   #dots i.on { opacity:.9; width:20px; border-radius:4px; }
 
   /* ---------- Now Playing ---------- */
-  #now { height:100%; display:flex; align-items:center; gap:5vw; padding:calc(var(--st) + 5vh) var(--sr) calc(var(--sb) + 3vh) var(--sl); }
-  #coverwrap { height:min(74vh, 42vw); aspect-ratio:1; flex-shrink:0; position:relative; }
+  #now { height:100%; display:flex; align-items:center; gap:5vw; padding:calc(var(--st) + 5vh) var(--sr) calc(var(--sb) + 26px) var(--sl); }
+  #coverwrap { translate:calc(var(--px,0) * 1px) calc(var(--py,0) * 1px); height:min(74vh, 42vw); aspect-ratio:1; flex-shrink:0; position:relative; }
   #cover { width:100%; height:100%; border-radius:18px; object-fit:cover; box-shadow:0 30px 80px rgba(0,0,0,.6); background:#222; transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s, border-radius .6s; display:block; }
   body.paused #cover { transform:scale(.93); opacity:.8; }
   #grooves, #hole, #arm { display:none; }
-  #info { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; transition:background .5s, padding .5s; border-radius:28px; }
+  #info { translate:calc(var(--px,0) * -0.5px) calc(var(--py,0) * -0.5px); flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; transition:background .5s, padding .5s; border-radius:28px; }
   #title { font-size:min(8.5vh,4.8vw); font-weight:800; line-height:1.05; letter-spacing:-.02em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   #artist { font-size:min(4.8vh,2.7vw); font-weight:600; opacity:.8; margin-top:1.4vh; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #album { font-size:min(3.4vh,1.9vw); opacity:.5; margin-top:.5vh; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  #progress { margin-top:4vh; }
+  #progress { margin-top:4vh; touch-action:none; cursor:pointer; }
+  #bararea { padding:12px 0; margin:-12px 0; }
+  #bar { transition:height .2s; }
+  #progress.drag #bar { height:10px; }
+  #progress.drag #fill { transition:none; }
+  #progress.drag #t-cur { opacity:1; color:#fff; font-weight:600; }
   #bar { height:6px; border-radius:3px; background:rgba(255,255,255,.2); overflow:hidden; }
   #fill { height:100%; width:0; background:var(--accent); border-radius:3px; transition:width .5s linear; }
   #times { display:flex; justify-content:space-between; font-size:min(2.9vh,1.6vw); opacity:.55; margin-top:1vh; font-variant-numeric:tabular-nums; }
-  #controls { display:flex; gap:3.5vw; align-items:center; margin-top:3vh; }
+  #controls { display:flex; gap:3.5vw; align-items:center; justify-content:center; margin-top:3vh; position:relative; }
   #controls button { background:none; border:none; color:#fff; cursor:pointer; opacity:.9; display:grid; place-items:center; transition:transform .15s; }
   #controls button:active { transform:scale(.88); }
   #controls svg { width:min(6.5vh,3.8vw); height:min(6.5vh,3.8vw); fill:currentColor; }
   #play { width:min(14vh,7.5vw); height:min(14vh,7.5vw); border-radius:50%; background:rgba(255,255,255,.15) !important; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
   #play svg { width:min(7.5vh,4.2vw); height:min(7.5vh,4.2vw); }
-  #like { margin-left:auto; }
+  #like { position:absolute; right:0; top:50%; translate:0 -50%; }
   #like svg { width:min(5.5vh,3.2vw) !important; height:min(5.5vh,3.2vw) !important; }
   #like.on { color:#1ed760; }
   #like.pop { animation:pop .4s; }
@@ -75,7 +80,7 @@
   #queue .q span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.75; }
   #queue .q b { font-weight:600; opacity:1; }
   #queue:empty { display:none; }
-  #bigclock { display:none; }
+  #bigclock { display:none; translate:calc(var(--px,0) * 0.8px) calc(var(--py,0) * 0.8px); }
 
   /* Theme: Glas */
   body.theme-glass #info { background:rgba(255,255,255,.08); backdrop-filter:blur(30px) saturate(1.3); -webkit-backdrop-filter:blur(30px) saturate(1.3); padding:4vh 3vw; border:1px solid rgba(255,255,255,.12); box-shadow:0 20px 60px rgba(0,0,0,.25); }
@@ -102,7 +107,7 @@
   body.theme-clock #title { font-size:min(5vh,3vw); -webkit-line-clamp:1; }
   body.theme-clock #artist { font-size:min(3.5vh,2vw); margin-top:.5vh; }
   body.theme-clock #controls { justify-content:center; margin-top:2vh; }
-  body.theme-clock #like { margin-left:0; }
+  body.theme-clock #like { position:static; translate:none; }
 
   /* ---------- Lyrics ---------- */
   #lyrics { height:100%; display:flex; flex-direction:column; padding:calc(var(--st) + 40px) var(--sr) 0 var(--sl); }
@@ -114,7 +119,7 @@
   #lwrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; scrollbar-width:none;
            mask:linear-gradient(transparent, #000 12%, #000 80%, transparent); -webkit-mask:linear-gradient(transparent, #000 12%, #000 80%, transparent); }
   #lwrap::-webkit-scrollbar { display:none; }
-  #lines { padding:30vh 0 45vh; }
+  #lines { padding:30vh 0 45vh; translate:calc(var(--px,0) * 0.5px) 0; }
   #lines p { font-size:min(6.5vh,3.6vw); font-weight:800; line-height:1.25; letter-spacing:-.01em; padding:1vh 0; opacity:.28; transition:opacity .4s, transform .4s, filter .4s; transform-origin:left center; cursor:pointer; filter:blur(.6px); }
   #lines p.past { opacity:.45; filter:none; }
   #lines p.cur { opacity:1; transform:scale(1.03); filter:none; color:#fff; text-shadow:0 0 30px rgba(255,255,255,.25); }
@@ -124,7 +129,7 @@
   /* ---------- Hochformat ---------- */
   @media (orientation:portrait) {
     #top { font-size:3.8vw; }
-    #now { flex-direction:column; justify-content:center; gap:4vh; padding-top:calc(var(--st) + 6vh); }
+    #now { flex-direction:column; justify-content:center; gap:4vh; padding-top:calc(var(--st) + 6vh); padding-bottom:calc(var(--sb) + 34px); }
     #coverwrap { height:auto; width:min(80vw, 42vh); }
     #info { flex:0; width:min(84vw, 520px); }
     #title { font-size:8vw; }
@@ -193,7 +198,7 @@
         <div id="artist"></div>
         <div id="album"></div>
         <div id="progress">
-          <div id="bar"><div id="fill"></div></div>
+          <div id="bararea"><div id="bar"><div id="fill"></div></div></div>
           <div id="times"><span id="t-cur">0:00</span><span id="t-dur">0:00</span></div>
         </div>
         <div id="controls">
@@ -448,7 +453,7 @@ function setTheme(i, announce){
 }
 let sx=0, sy=0, st=0, tracking=false;
 document.addEventListener('touchstart', e => {
-  if(e.target.closest('button')) { tracking=false; return; }
+  if(e.target.closest('button, #progress')) { tracking=false; return; }
   const t = e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); tracking=true;
 }, { passive:true });
 document.addEventListener('touchend', e => {
@@ -485,7 +490,7 @@ function tick(){
   const dt = now.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' });
   $('clock').textContent = hm; $('idleclock').textContent = hm; $('bigtime').textContent = hm;
   $('date').textContent = dt; $('bigdate').textContent = now.toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long' });
-  if(S.duration){
+  if(S.duration && !seeking){
     const cur = curMs();
     $('fill').style.width = (cur / S.duration * 100) + '%';
     $('t-cur').textContent = fmt(cur); $('t-dur').textContent = fmt(S.duration);
@@ -570,6 +575,78 @@ requestAnimationFrame(frame);
 async function keepAwake(){ try { if('wakeLock' in navigator && document.visibilityState==='visible') await navigator.wakeLock.request('screen'); } catch {} }
 document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible'){ keepAwake(); poll(); loadQueue(); } });
 document.addEventListener('click', keepAwake, { once:true });
+
+
+/* ================= Vorspulen per Finger ================= */
+let seeking = false;
+(function(){
+  const pr = $('progress');
+  const posFor = x => { const r = $('bar').getBoundingClientRect(); return Math.max(0, Math.min(1, (x - r.left) / r.width)); };
+  let f = 0;
+  const show = () => { $('fill').style.width = (f*100) + '%'; $('t-cur').textContent = fmt(f * S.duration); };
+  pr.addEventListener('pointerdown', e => { if(!S.duration) return; seeking = true; pr.classList.add('drag'); pr.setPointerCapture(e.pointerId); f = posFor(e.clientX); show(); });
+  pr.addEventListener('pointermove', e => { if(!seeking) return; f = posFor(e.clientX); show(); });
+  const end = () => {
+    if(!seeking) return; seeking = false; pr.classList.remove('drag');
+    const ms = Math.round(f * S.duration);
+    S.progress = ms; S.fetchedAt = Date.now(); L.idx = -1;
+    control('PUT', '/me/player/seek?position_ms=' + ms);
+  };
+  pr.addEventListener('pointerup', end); pr.addEventListener('pointercancel', end);
+})();
+
+/* ================= Bewegung (Parallax + Kurven) ================= */
+(function(){
+  const MAX = 14;                 // maximale Verschiebung in px
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  let base = null, accX = 0, accY = 0;
+  function screenAxes(x, y){     // Werte an Bildschirmausrichtung anpassen
+    const a = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+    if(a === 90)  return [ y, -x];
+    if(a === -90 || a === 270) return [-y,  x];
+    if(a === 180) return [-x, -y];
+    return [x, y];
+  }
+  function onOrient(e){
+    if(e.beta == null) return;
+    let [gx, gy] = screenAxes(e.gamma, e.beta);
+    if(!base) base = [gx, gy];
+    // Ausgangslage langsam nachziehen, damit alles wieder zur Mitte zurückkehrt
+    base[0] += (gx - base[0]) * 0.02; base[1] += (gy - base[1]) * 0.02;
+    window._tilt = [gx - base[0], gy - base[1]];
+  }
+  function onMotion(e){
+    const a = e.acceleration; if(!a || a.x == null) return;
+    const [ax, ay] = screenAxes(a.x, -a.y);
+    accX += (ax - accX) * 0.08; accY += (ay - accY) * 0.08;   // geglättet: Kurven im Auto
+  }
+  function loop(){
+    requestAnimationFrame(loop);
+    const t = window._tilt || [0,0];
+    tx = Math.max(-MAX, Math.min(MAX, t[0] * 0.6 - accX * 4));
+    ty = Math.max(-MAX, Math.min(MAX, t[1] * 0.6 - accY * 4));
+    cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08;
+    const st = document.documentElement.style;
+    st.setProperty('--px', cx.toFixed(2)); st.setProperty('--py', cy.toFixed(2));
+  }
+  function start(){
+    addEventListener('deviceorientation', onOrient);
+    addEventListener('devicemotion', onMotion);
+    requestAnimationFrame(loop);
+  }
+  async function ask(){
+    try {
+      if(typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission){
+        const r = await DeviceOrientationEvent.requestPermission();
+        if(DeviceMotionEvent.requestPermission) await DeviceMotionEvent.requestPermission();
+        if(r === 'granted') start();
+      } else start();
+    } catch {}
+  }
+  if(typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission){
+    document.addEventListener('touchend', ask, { once:true });   // iOS will eine Berührung vorher
+  } else start();
+})();
 
 /* ================= Start ================= */
 (async function init(){
